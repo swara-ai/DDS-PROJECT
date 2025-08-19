@@ -1,0 +1,100 @@
+import heapq
+from collections import deque
+
+class Driver:
+    def __init__(self, name, distance, rating):
+        self.name = name
+        self.distance = distance
+        self.rating = rating      
+
+    def __lt__(self, other):
+        if self.distance == other.distance:
+            return self.rating > other.rating
+        return self.distance < other.distance
+
+class Rider:
+    def __init__(self, name, destination):
+        self.name = name
+        self.destination = destination
+
+class RideSharingDispatch:
+    def __init__(self):
+        self.riders = deque()      
+        self.drivers = []         
+        self.history = []           
+
+    def add_driver(self, name, distance, rating):
+        driver = Driver(name, distance, rating)
+        heapq.heappush(self.drivers, driver)
+        print(f"🚗 Driver {name} added (Distance: {distance}, Rating: {rating}).")
+
+    def add_rider(self, name, destination):
+        rider = Rider(name, destination)
+        self.riders.append(rider)
+        print(f"🧑‍🤝‍🧑 Rider {name} added (Destination: {destination}).")
+
+    def dispatch(self):
+        if not self.riders:
+            print("⚠️ No riders waiting.")
+            return
+        if not self.drivers:
+            print("⚠️ No drivers available.")
+            return
+
+        rider = self.riders.popleft()
+        driver = heapq.heappop(self.drivers)
+
+        ride_info = {
+            "rider": rider.name,
+            "driver": driver.name,
+            "destination": rider.destination,
+            "rating": driver.rating,
+            "distance": driver.distance
+        }
+        self.history.append(ride_info)
+
+        print(f"✅ Rider {rider.name} assigned to Driver {driver.name} "
+              f"(Dist: {driver.distance}, Rating: {driver.rating}).")
+
+    def show_history(self):
+        if not self.history:
+            print("📂 No rides completed yet.")
+            return
+
+        print("\n---- Ride History ----")
+        for i, ride in enumerate(self.history, 1):
+            print(f"{i}. Rider {ride['rider']} -> Driver {ride['driver']} "
+                  f"to {ride['destination']} "
+                  f"(Dist: {ride['distance']}, Rating: {ride['rating']})")
+        print("-----------------------")
+
+    def show_riders(self):
+        if not self.riders:
+            print("🛑 No riders waiting.")
+            return
+        print("\nWaiting Riders:")
+        for rider in self.riders:
+            print(f"- {rider.name} (Destination: {rider.destination})")
+
+    def show_drivers(self):
+        if not self.drivers:
+            print("🛑 No drivers available.")
+            return
+        print("\nAvailable Drivers:")
+        for driver in sorted(self.drivers):
+            print(f"- {driver.name} (Dist: {driver.distance}, Rating: {driver.rating})")
+
+if __name__ == "__main__":
+    system = RideSharingDispatch()
+
+    system.add_driver("SWARA", 3, 4.8)
+    system.add_driver("CHOTU", 2, 4.5)
+    system.add_driver("MOTU", 2, 4.9)
+
+    system.add_rider("Rohan", "Airport")
+    system.add_rider("Sneha", "Mall")
+
+    system.dispatch()
+    system.dispatch()
+
+    system.show_history()
